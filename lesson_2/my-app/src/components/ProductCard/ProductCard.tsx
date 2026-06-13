@@ -9,6 +9,7 @@ const ProductCard = ( {product}: IProductCard  ) => {
 
     return (
         <article>
+            <img src={product.image} alt={product.title} />
             <h2>{product.title}</h2>
             <p>Category: {product.category}</p>
             <p>Price: {product.price}</p>
