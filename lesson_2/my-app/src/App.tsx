@@ -10,7 +10,7 @@ const App = () => {
 
     const [products, setProducts] = useState([]); // вместо импорта, теперь это состояние
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null); //дженерики для проверки, рез-т которой может быть как строка, так и null. Проверку instanceof ниже сделал потому, что TS ругался и я показал ему, что err - это объект ошибки
+    const [error, setError] = useState(''); // до этого у меня было null и пришлось костылить дженериками <string | null>, а оно вон как просто оказалось)))
 
     useEffect(() => {
         const fetchData = async () => {
@@ -21,11 +21,7 @@ const App = () => {
                 setIsLoading(false); // данные получены - отключаю загрузку
 
             } catch (err) {
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError('Неизвестная ошибка');
-                }                
+                setError(err instanceof Error ? err.message : 'Неизвестная ошибка');
                 setIsLoading(false);
             }
         };
