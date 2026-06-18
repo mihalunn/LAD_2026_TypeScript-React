@@ -1,10 +1,10 @@
 import {IProduct} from "../../types";
 
-interface IProductCard {
+interface IProductCardProps {
     product: IProduct;
 }
 
-const ProductCard = ( {product}: IProductCard  ) => {
+const ProductCard = ( {product}: IProductCardProps ) => {
 
 
     return (

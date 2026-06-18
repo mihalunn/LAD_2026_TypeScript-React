@@ -1,6 +1,7 @@
 import ProductList from "./components/ProductList/ProductList";
 // import {products} from "./mocks/products"; // закомментил свои моки
 import { useEffect, useState} from "react";
+import { requestProducts } from "./api";
 
 const App = () => {
 
@@ -12,15 +13,9 @@ const App = () => {
     const [error, setError] = useState<string | null>(null); //дженерики для проверки, рез-т которой может быть как строка, так и null. Проверку instanceof ниже сделал потому, что TS ругался и я показал ему, что err - это объект ошибки
 
     useEffect(() => {
-        const fetchProducts = async () => {
+        const fetchData = async () => {
             try {
-                const response = await fetch('https://fakestoreapi.com/products');
-
-                if(!response.ok) {
-                    throw new Error(`Ошибка HTTP: ${response.status}`); // делаю проверку сразу, на неё во всех гайдах обращают особое внимание
-                }
-
-                const data = await response.json();
+                const data = await requestProducts();
 
                 setProducts(data); // сохранил данные
                 setIsLoading(false); // данные получены - отключаю загрузку
@@ -35,7 +30,7 @@ const App = () => {
             }
         };
 
-        fetchProducts();
+        fetchData();
     }, []); // пустой массив для того, чтобы запрос выполнился только при загрузке
  
     function handleProductClick() {
