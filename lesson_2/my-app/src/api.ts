@@ -2,6 +2,8 @@ const PRODUCTS_URL = "https://fakestoreapi.com/products";
 
 const requestProducts = async () => {
     try {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
         const response = await fetch('https://fakestoreapi.com/products');
 
         if(!response.ok) {
