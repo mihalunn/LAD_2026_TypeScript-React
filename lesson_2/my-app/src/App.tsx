@@ -2,6 +2,7 @@ import ProductList from "./components/ProductList/ProductList";
 // import {products} from "./mocks/products"; // закомментил свои моки
 import { useEffect, useState} from "react";
 import { requestProducts } from "./api";
+import { handleError } from "./utils/errorHandler";
 
 const App = () => {
 
@@ -21,7 +22,7 @@ const App = () => {
                 setIsLoading(false); // данные получены - отключаю загрузку
 
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Неизвестная ошибка');
+                setError(handleError(err));
                 setIsLoading(false);
             }
         };
