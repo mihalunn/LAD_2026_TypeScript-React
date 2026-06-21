@@ -5,6 +5,16 @@ interface IProductListProps {
     products: IProduct[];
 }
 
+//немного стилей, чтобы получше смотрелось:
+const gridStyle: React.CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(5, 1fr)',
+    gap: '20px',
+    listStyle: 'none',
+    padding: 0,
+    margin: 0
+};
+
 const ProductList = ({products}:IProductListProps) => {
 
     if ( products.length === 0 ) {
@@ -15,7 +25,7 @@ const ProductList = ({products}:IProductListProps) => {
     return (
         <section>
             <h2>Products</h2>
-            <ul>
+            <ul style={gridStyle}>
                 {products.map((product) => (
                     <li>
                         <ProductCard key={product.id} product={product} />

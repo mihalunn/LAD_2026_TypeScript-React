@@ -3,7 +3,7 @@ import ProductList from "./components/ProductList/ProductList";
 import { useEffect, useState, useRef } from "react";
 import { requestProducts } from "./api";
 import { handleError } from "./utils/errorHandler";
-import { filterByTitle } from "./utils/filterProducts";
+import { filterByTitle, filterByCategory } from "./utils/filterProducts";
 import { IProduct } from "./types";
 
 const App = () => {
@@ -15,11 +15,14 @@ const App = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(''); // до этого у меня было null и пришлось костылить дженериками <string | null>, а оно вон как просто оказалось)))
     const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]); //дженерик добавил после того, как TS начал ругаться при вызове setFilteredProducts(filtered);
+    const [selectedCategory, setSelectedCategory] = useState('all');
 
     // 2. REFS
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     // 3. ЭФФЕКТЫ
+
+        // для запроса
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -38,16 +41,31 @@ const App = () => {
         fetchData();
     }, []); // пустой массив для того, чтобы запрос выполнился только при загрузке
 
+        // для фильтра по категории использую ранее созданную функцию applyFilters()
+    useEffect(() => {
+        applyFilters();
+    },[selectedCategory]);
+
+
     // 4. ОБРАБОТЧИКИ
+
+        // счетчик кликов
     const handleProductClick = () => {
         setIsProductListVisible((prevState) => !prevState);
         setCount(prevState => prevState + 1);
     }
 
-    const handleSearch = () => {
+        // логика фильтров
+    const applyFilters = () => {
         const searchValue = searchInputRef.current?.value || ''; // читаю значение из ref - если значение null или undefined, то используется пустая строка
-        const filtered = filterByTitle(products, searchValue); // эту ф-ю я импортировал из filterProducts.ts 
+        const filteredByTitle = filterByTitle(products, searchValue); // эту ф-ю я импортировал из filterProducts.ts 
+        const filtered = filterByCategory(filteredByTitle, selectedCategory);
         setFilteredProducts(filtered);
+    }
+
+        // для текста тоже использую applyFilters()
+    const handleSearch = () => {
+        applyFilters();
     }
 
     // 5. RETURN (последним, т.к. ссылается на функции-обработчики)
@@ -67,8 +85,21 @@ const App = () => {
                         onChange={handleSearch}
                     />
 
-                    <button onClick={handleProductClick}>{isProductListVisible ? 
-                    "Спрятать товары" : "Показать товары"}</button>
+                    {/* с этим надо еще посидеть, делал на скорую руку, подключал нейронку */}
+                    <select 
+                        value={selectedCategory}
+                        onChange={(event) => setSelectedCategory(event.target.value)}
+                    >
+                        <option value="all">Все категории</option>
+                        <option value="electronics">Электроника</option>
+                        <option value="jewelery">Украшения</option>
+                        <option value="men's clothing">Мужская одежда</option>
+                        <option value="women's clothing">Женская одежда</option>
+                    </select>
+
+                    <button onClick={handleProductClick}>
+                        {isProductListVisible ? "Спрятать товары" : "Показать товары"}
+                    </button>
 
                     <p>{isProductListVisible}</p>
                     <p>Кликов: {count}</p>
