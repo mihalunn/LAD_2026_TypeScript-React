@@ -5,6 +5,7 @@ import { requestProducts } from "./api";
 import { handleError } from "./utils/errorHandler";
 import { filterByTitle, filterByCategory } from "./utils/filterProducts";
 import { IProduct } from "./types";
+import { debounce } from "./utils/debounce";
 
 const App = () => {
     // 1. СОСТОЯНИЯ
@@ -16,9 +17,11 @@ const App = () => {
     const [error, setError] = useState(''); // до этого у меня было null и пришлось костылить дженериками <string | null>, а оно вон как просто оказалось)))
     const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]); //дженерик добавил после того, как TS начал ругаться при вызове setFilteredProducts(filtered);
     const [selectedCategory, setSelectedCategory] = useState('all');
+    // const [timerId, setTimerId] = useState<number | null>(null);
 
     // 2. REFS
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const debouncedRef = useRef<(() => void) | null>(null);
 
     // 3. ЭФФЕКТЫ
 
@@ -46,6 +49,14 @@ const App = () => {
         applyFilters();
     },[selectedCategory]);
 
+    // useEffect(() => {
+    //     return () => {
+    //         if (timerId) {
+    //             clearTimeout(timerId);
+    //         }
+    //     };
+    // }, [timerId]); 
+
 
     // 4. ОБРАБОТЧИКИ
 
@@ -57,16 +68,27 @@ const App = () => {
 
         // логика фильтров
     const applyFilters = () => {
+        console.log('applyFilters вызвана:', new Date().toISOString());
+
         const searchValue = searchInputRef.current?.value || ''; // читаю значение из ref - если значение null или undefined, то используется пустая строка
-        const filteredByTitle = filterByTitle(products, searchValue); // эту ф-ю я импортировал из filterProducts.ts 
+        const filteredByTitle = filterByTitle(products, searchValue); 
         const filtered = filterByCategory(filteredByTitle, selectedCategory);
         setFilteredProducts(filtered);
     }
 
-        // для текста тоже использую applyFilters()
-    const handleSearch = () => {
-        applyFilters();
+    if(!debouncedRef.current) {
+        debouncedRef.current = debounce(applyFilters, 2000);
     }
+
+    // const handleSearch = () => {
+    //     if (timerId) {
+    //         clearTimeout(timerId); 
+    //     }
+
+    //     setTimerId(window.setTimeout(() => {
+    //         applyFilters();
+    //     }, 500));
+    // }
 
     // 5. RETURN (последним, т.к. ссылается на функции-обработчики)
     return (
@@ -82,7 +104,7 @@ const App = () => {
                         ref = {searchInputRef}
                         type="text" 
                         placeholder="Поиск товаров..."
-                        onChange={handleSearch}
+                        onChange={debouncedRef.current}
                     />
 
                     {/* с этим надо еще посидеть, делал на скорую руку, подключал нейронку */}
@@ -93,8 +115,8 @@ const App = () => {
                         <option value="all">Все категории</option>
                         <option value="electronics">Электроника</option>
                         <option value="jewelery">Украшения</option>
-                        <option value="men's clothing">Мужская одежда</option>
-                        <option value="women's clothing">Женская одежда</option>
+                        <option value="mens_clothing">Мужская одежда</option>
+                        <option value="womens_clothing">Женская одежда</option>
                     </select>
 
                     <button onClick={handleProductClick}>
