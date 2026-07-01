@@ -22,6 +22,9 @@ const App = () => {
     // 2. REFS
     const searchInputRef = useRef<HTMLInputElement>(null);
     const debouncedRef = useRef<(() => void) | null>(null);
+    const productsRef = useRef<IProduct[]>([]); 
+    productsRef.current = products
+
 
     // 3. ЭФФЕКТЫ
 
@@ -33,14 +36,12 @@ const App = () => {
 
                 setProducts(data); // сохранил данные
                 setFilteredProducts(data); // чтобы инициализировать отфильтрованные продукты при загрузке
-                setIsLoading(false); // данные получены - отключаю загрузку
-
             } catch (err) {
-                setError(handleError(err));
+                setError(handleError(err));                
+            } finally {
                 setIsLoading(false);
             }
         };
-
         fetchData();
     }, []); // пустой массив для того, чтобы запрос выполнился только при загрузке
 
@@ -63,7 +64,7 @@ const App = () => {
         // счетчик кликов
     const handleProductClick = () => {
         setIsProductListVisible((prevState) => !prevState);
-        setCount(prevState => prevState + 1);
+        setCount(prevState => prevState + 1); 
     }
 
         // логика фильтров
@@ -71,7 +72,7 @@ const App = () => {
         console.log('applyFilters вызвана:', new Date().toISOString());
 
         const searchValue = searchInputRef.current?.value || ''; // читаю значение из ref - если значение null или undefined, то используется пустая строка
-        const filteredByTitle = filterByTitle(products, searchValue); 
+        const filteredByTitle = filterByTitle(productsRef.current, searchValue); 
         const filtered = filterByCategory(filteredByTitle, selectedCategory);
         setFilteredProducts(filtered);
     }
@@ -93,20 +94,20 @@ const App = () => {
     // 5. RETURN (последним, т.к. ссылается на функции-обработчики)
     return (
         <div>
-            <h1>Куча всевозможных товаров</h1>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex beatae earum modi soluta deserunt excepturi perferendis explicabo natus! Quisquam dicta reiciendis tenetur maiores voluptatibus illo nostrum nemo maxime nobis corrupti?</p>            
+            <h1>Товары</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex beatae earum modi soluta deserunt excepturi perferendis explicabo natus! Quisquam dicta reiciendis tenetur maiores voluptatibus illo nostrum nemo maxime nobis corrupti?</p>  
+
+            <input 
+                ref = {searchInputRef}
+                type="text" 
+                placeholder="Поиск товаров..."
+                onChange={debouncedRef.current}
+            />          
 
             {isLoading ? <p>Загрузка товаров...</p> : null}
             {error ? <p>Ошибка: {error}</p> : null}
             {!isLoading && !error && (
                 <div>
-                    <input 
-                        ref = {searchInputRef}
-                        type="text" 
-                        placeholder="Поиск товаров..."
-                        onChange={debouncedRef.current}
-                    />
-
                     {/* с этим надо еще посидеть, делал на скорую руку, подключал нейронку */}
                     <select 
                         value={selectedCategory}
@@ -115,8 +116,8 @@ const App = () => {
                         <option value="all">Все категории</option>
                         <option value="electronics">Электроника</option>
                         <option value="jewelery">Украшения</option>
-                        <option value="mens_clothing">Мужская одежда</option>
-                        <option value="womens_clothing">Женская одежда</option>
+                        <option value="men's clothing">Мужская одежда</option>
+                        <option value="women's clothing">Женская одежда</option>
                     </select>
 
                     <button onClick={handleProductClick}>
